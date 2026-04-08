@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes | GAMERADO TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --primary-red: #e50914;
+            --text-light: #ffffff;
+            --text-muted: #aaaaaa;
+            --card-bg: #1a1a1a;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-light); overflow-x: hidden; padding-bottom: 30px; }
+        
+        /* Ações Superiores (Glassmorphism e Animadas) */
+        .top-nav {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; z-index: 20;
+        }
+        .back-btn { color: white; font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); text-decoration: none; }
+        
+        .top-actions { display: flex; gap: 15px; }
+        .action-btn-top {
+            background: rgba(20, 20, 20, 0.5); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .action-btn-top i { font-size: 1.25rem; color: #fff; transition: all 0.3s ease; }
+        .action-btn-top:active { transform: scale(0.9); }
+
+        /* Animação Favoritar */
+        .action-btn-top.heart.active { background: rgba(229, 9, 20, 0.15); border-color: #e50914; }
+        .action-btn-top.heart.active i { color: #e50914; animation: heartBurst 0.6s forwards; }
+
+        /* Animação Listar */
+        .action-btn-top.list.active { background: rgba(76, 175, 80, 0.15); border-color: #4CAF50; }
+        .action-btn-top.list.active i { color: #4CAF50; animation: checkPop 0.5s forwards; }
+
+        @keyframes heartBurst {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.4); text-shadow: 0 0 15px #e50914; }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes checkPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.4); text-shadow: 0 0 15px #4CAF50; opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        /* Banner Menor e Capa Maior */
+        .hero-banner {
+            position: relative; width: 100%; height: 35vh;
+            background-size: cover; background-position: center;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .hero-overlay {
+            position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(to top, var(--bg-color) 0%, rgba(15,15,15,0.7) 60%, rgba(15,15,15,0.2) 100%);
+            backdrop-filter: blur(3px); /* Deixa o fundo desfocado levemente por ser a mesma foto */
+        }
+        .poster-image {
+            position: relative; z-index: 2;
+            width: 175px; height: 260px;
+            border-radius: 10px; object-fit: cover;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+            margin-bottom: -70px;
+        }
+
+        /* Tags */
+        .tags-container {
+            display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px;
+            margin-top: 85px; justify-content: center;
+        }
+        .tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; color: var(--text-light); font-weight: 500; }
+
+        /* Botões Centrais Profissionais e Estilosos */
+        .action-bar { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px 10px; }
+        
+        .btn-modern {
+            background: linear-gradient(145deg, #222, #181818); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 12px 10px; width: 85px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-light); gap: 8px; font-size: 0.7rem; font-family: 'Poppins', sans-serif;
+            font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .btn-modern:active { transform: scale(0.95); }
+        .btn-modern i { font-size: 1.4rem; color: #ccc; }
+
+        /* Botão Play / Ver Episódios Destacado */
+        .btn-modern.primary {
+            background: linear-gradient(45deg, var(--primary-red), #b20710);
+            border: none; width: 145px; flex-direction: row; font-size: 0.85rem; font-weight: 700;
+        }
+        .btn-modern.primary i { font-size: 1.5rem; color: white; }
+
+        /* Informações */
+        .info-section { padding: 0 20px; margin-top: 5px; text-align: center; }
+        .info-section h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 5px; }
+        .info-section h2 { font-size: 0.9rem; color: var(--primary-red); font-weight: 500; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .info-section p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; text-align: justify; }
+
+        /* Recomendações (Carrossel 10 conteúdos e Cards Maiores) */
+        .recommendations { padding: 20px 0; margin-top: 15px; }
+        .rec-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 15px; }
+        .rec-header h3 { font-size: 1.1rem; }
+        .rec-header .mais-btn { background: #1e1e1e; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; }
+        
+        .slider-track { display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 15px; padding: 0 20px; }
+        .slider-track::-webkit-scrollbar { display: none; }
+        
+        .rec-card {
+            position: relative; width: 145px; height: 215px; flex-shrink: 0;
+            border-radius: 10px; overflow: hidden; cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);
+        }
+        .rec-card img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .rec-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+            padding: 12px 10px; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .rec-title { font-size: 0.85rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rec-meta { font-size: 0.65rem; color: var(--primary-red); display: flex; justify-content: space-between; margin-top: 4px; font-weight: bold; }
+
+        /* Modais Centralizados e com Scroll */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: linear-gradient(145deg, #1f1f1f, #121212); width: 90%; max-width: 400px; border-radius: 16px; padding: 20px; max-height: 75vh; overflow-y: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+        .modal-header h3 { font-size: 1.2rem; margin: 0; color: var(--primary-red); }
+        .close-modal { color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        
+        .season-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-radius: 8px; margin-bottom: 5px; cursor: pointer; transition: background 0.2s; }
+        .season-item:hover { background: rgba(255,255,255,0.05); }
+        .season-item i.radio { color: var(--text-muted); font-size: 1.2rem; }
+        .season-item.active { background: rgba(229, 9, 20, 0.1); border-left: 3px solid var(--primary-red); }
+        .season-item.active i.radio { color: var(--primary-red); }
+        
+        .episode-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 8px; gap: 15px; cursor: pointer; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); }
+        .episode-item:hover { background: rgba(255,255,255,0.1); }
+        .ep-thumb { width: 120px; height: 70px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .ep-info { flex: 1; display: flex; align-items: center; justify-content: space-between; }
+        .ep-title { font-size: 0.85rem; font-weight: 500; margin-top: 3px; }
+        .ep-actions { color: white; font-size: 1.5rem; opacity: 0.8; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <div class="top-actions">
+            <div class="action-btn-top list" onclick="toggleBtn(this, 'list')" title="Listar">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="action-btn-top heart" onclick="toggleBtn(this, 'heart')" title="Gostei">
+                <i class="far fa-heart"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-banner" id="heroBanner">
+        <div class="hero-overlay"></div>
+        <img src="" id="posterImage" class="poster-image" alt="Capa">
+    </div>
+
+    <div class="tags-container" id="tagsContainer">
+        <span class="tag">DUB</span>
+        <span class="tag" id="tagYear">2026</span>
+        <span class="tag" id="tagGenre">Crime</span>
+        <span class="tag">Em Alta</span>
+        <span class="tag">4K HDR</span>
+    </div>
+
+    <div class="action-bar hidden" id="actionBarFilme">
+        <button class="btn-modern primary" id="btnAssistirFilme">
+            <i class="fas fa-play"></i> Assistir
+        </button>
+        <button class="btn-modern">
+            <i class="fas fa-tv"></i> Espelhar
+        </button>
+        <button class="btn-modern">
+            <i class="fas fa-download"></i> Baixar
+        </button>
+        <button class="btn-modern" onclick="compartilhar()">
+            <i class="fas fa-share-alt"></i> Share
+        </button>
+    </div>
+
+    <div class="action-bar hidden" id="actionBarSerie">
+        <button class="btn-modern primary" onclick="openModal('episodeModal')">
+            <i class="fas fa-play"></i> Episódios
+        </button>
+        <button class="btn-modern" onclick="openModal('seasonModal')">
+            <i class="fas fa-layer-group"></i> <span id="btnSeasonText">Temp 1</span>
+        </button>
+        <button class="btn-modern" onclick="compartilhar()">
+            <i class="fas fa-share-alt"></i> Share
+        </button>
+    </div>
+
+    <div class="info-section">
+        <h1 id="itemTitle">Carregando...</h1>
+        <h2>Sinopse</h2>
+        <p id="itemSinopse">História envolvente para prender sua atenção do início ao fim.</p>
+    </div>
+
+    <div class="recommendations">
+        <div class="rec-header">
+            <h3>Recomendações</h3>
+            <a href="explorar.html" class="mais-btn">Explorar</a>
+        </div>
+        <div class="slider-track" id="recTrack"></div>
+    </div>
+
+    <div class="modal-overlay" id="seasonModal" onclick="closeModal(event, 'seasonModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Temporadas</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'seasonModal')"></i>
+            </div>
+            <div id="seasonList"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="episodeModal" onclick="closeModal(event, 'episodeModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="epModalTitle">Episódios</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'episodeModal')"></i>
+            </div>
+            <div id="episodeList"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = {};
+        let selectedSeason = 1;
+
+        // Lógica de Animação Incrível para os Botões Superiores
+        function toggleBtn(element, type) {
+            element.classList.toggle('active');
+            const icon = element.querySelector('i');
+            if(type === 'heart' && element.classList.contains('active')){
+                icon.classList.remove('far'); icon.classList.add('fas');
+            } else if(type === 'heart') {
+                icon.classList.remove('fas'); icon.classList.add('far');
+            } else if (type === 'list' && element.classList.contains('active')) {
+                icon.classList.remove('fa-plus'); icon.classList.add('fa-check');
+            } else if (type === 'list') {
+                icon.classList.remove('fa-check'); icon.classList.add('fa-plus');
+            }
+        }
+
+        const savedData = sessionStorage.getItem('currentMediaData');
+        
+        if (savedData) {
+            currentData = JSON.parse(savedData);
+            
+            document.title = currentData.title + " | GAMERADO TV";
+            document.getElementById('itemTitle').innerText = currentData.title;
+            document.getElementById('tagYear').innerText = currentData.year || '2026';
+            document.getElementById('tagGenre').innerText = (currentData.genre || 'Filme').split('/')[0];
+
+            if (currentData.banner) document.getElementById('heroBanner').style.backgroundImage = `url('${currentData.banner}')`;
+            if (currentData.cover) document.getElementById('posterImage').src = currentData.cover;
+            if (currentData.seriesInfo && currentData.seriesInfo.synopsis) document.getElementById('itemSinopse').innerText = currentData.seriesInfo.synopsis;
+
+            if (currentData.type === 'movie') {
+                document.getElementById('actionBarFilme').classList.remove('hidden');
+                document.getElementById('btnAssistirFilme').onclick = () => {
+                    window.location.href = `player.html?title=${encodeURIComponent(currentData.title)}&url=${encodeURIComponent(currentData.url)}`;
+                };
+            } else if (currentData.type === 'serie') {
+                document.getElementById('actionBarSerie').classList.remove('hidden');
+                buildSeasonModal();
+                buildEpisodeModal();
+            }
+
+            loadRecommendations();
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(e, id) { 
+            if(e && e.target.id !== id) return;
+            document.getElementById(id).classList.remove('active'); 
+        }
+
+        function buildSeasonModal() {
+            const container = document.getElementById('seasonList');
+            const info = currentData.seriesInfo;
+            if(!info || !info.seasons) return;
+
+            let html = '';
+            info.seasons.forEach(season => {
+                let num = season.seasonNumber;
+                let iconClass = num === selectedSeason ? 'fas fa-dot-circle radio' : 'far fa-circle radio';
+                let activeClass = num === selectedSeason ? 'active' : '';
+                html += `
+                <div class="season-item ${activeClass}" onclick="selectSeason(${num})">
+                    <span>Temporada ${num}</span>
+                    <i class="${iconClass}"></i>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectSeason(seasonNum) {
+            selectedSeason = seasonNum;
+            document.getElementById('btnSeasonText').innerText = `Temp ${seasonNum}`;
+            buildSeasonModal(); 
+            buildEpisodeModal(); 
+            closeModal(null, 'seasonModal');
+            openModal('episodeModal');
+        }
+
+        function buildEpisodeModal() {
+            const container = document.getElementById('episodeList');
+            const info = currentData.seriesInfo;
+            if(!info || !info.seasons) return;
+
+            const currentSeasonData = info.seasons.find(s => s.seasonNumber === selectedSeason);
+            document.getElementById('epModalTitle').innerText = `Temporada ${selectedSeason}`;
+
+            if (!currentSeasonData) {
+                container.innerHTML = "<p style='padding:20px; text-align:center;'>Nenhum episódio encontrado.</p>";
+                return;
+            }
+
+            let html = '';
+            currentSeasonData.episodes.forEach((ep, index) => {
+                const epNumber = index + 1;
+                const photoUrl = ep.thumb ? ep.thumb : currentData.cover;
+                const finalUrl = ep.link ? ep.link : currentData.url;
+
+                html += `
+                <div class="episode-item" onclick="window.location.href='player.html?title=${encodeURIComponent(currentData.title + ' - ' + ep.name)}&url=${encodeURIComponent(finalUrl)}'">
+                    <img src="${photoUrl}" class="ep-thumb" alt="${ep.name}" onerror="this.src='${currentData.cover}'">
+                    <div class="ep-info">
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-size: 0.65rem; color: var(--primary-red); font-weight: bold; letter-spacing: 1px;">EPISÓDIO ${epNumber}</span>
+                            <span class="ep-title">${ep.name}</span>
+                        </div>
+                        <i class="fas fa-play-circle ep-actions"></i>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function compartilhar() {
+            if (navigator.share) {
+                navigator.share({ title: currentData.title, text: 'Assista "' + currentData.title + '" no GAMERADO TV!', url: window.location.href }).catch(console.error);
+            } else { alert('Compartilhamento nativo não suportado.'); }
+        }
+
+        function loadRecommendations() {
+            // Recomendações com Titulo e Info sobrepostas (10 itens para scroll)
+            const recs = [
+                { title: "Tropa de Elite 2", year: "2010", duration: "115m", img: "https://image.tmdb.org/t/p/w220_and_h330_face/ldCCmRdBPk5FR13W975zXAM1dGi.jpg" },
+                { title: "Stranger Things", year: "2016", duration: "Série", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaAqcG1OaxUfvY_gPTQeCOju0AFvtFZgozxGfqI8aMM0wgnsbd0vW32Ub5&s=10" },
+                { title: "Cidade de Deus", year: "2002", duration: "130m", img: "https://image.tmdb.org/t/p/w220_and_h330_face/gfnXixcGC060QcG6JPxN6AMdVsq.jpg" },
+                { title: "Solo Leveling", year: "2024", duration: "Anime", img: "https://images.justwatch.com/poster/310154566/s332/temporada-1" },
+                { title: "Godzilla", year: "2014", duration: "123m", img: "https://image.tmdb.org/t/p/w220_and_h330_face/9dyFXQwmFHI1gMn2JEczgKD1hwO.jpg" },
+                { title: "The Walking Dead", year: "2010", duration: "Série", img: "https://i.imgur.com/TD0ia7L.jpeg" },
+                { title: "Morte Súbita", year: "2007", duration: "103m", img: "https://image.tmdb.org/t/p/original/ip7nVBDhT9J9blktI3WGWMWCWco.jpg" },
+                { title: "Peaky Blinders", year: "2013", duration: "Série", img: "https://image.tmdb.org/t/p/w220_and_h330_face/i0uajcHH9yogXMfDHpOXexIukG9.jpg" },
+                { title: "Transformers", year: "2024", duration: "104m", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcLm0SoPjI_HREf0n3pgjy4ssvONALiOe2PXyVNo-i4Q&s=10" },
+                { title: "Tubarão", year: "1975", duration: "124m", img: "https://image.tmdb.org/t/p/w220_and_h330_face/iD2XVowFgHngYGamCAdq2T44gMr.jpg" }
+            ];
+            
+            let html = '';
+            recs.forEach(item => {
+                html += `
+                <div class="rec-card" onclick="window.location.href='index.html'">
+                    <img src="${item.img}" alt="${item.title}">
+                    <div class="rec-overlay">
+                        <div class="rec-title">${item.title}</div>
+                        <div class="rec-meta">
+                            <span>${item.year}</span>
+                            <span>${item.duration}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('recTrack').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
