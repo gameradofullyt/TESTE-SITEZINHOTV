@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Cadastro | GAMERADOFLIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <style>
+        :root { --dark: #040D12; --red: #C63C51; --light: #f3f3f3; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(4, 13, 18, 0.85), rgba(4, 13, 18, 0.85)), url('https://image.tmdb.org/t/p/original/mDeUmG9ca0p2uY686p799986as3.jpg');
+            background-size: cover; background-position: center;
+            height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;
+        }
+        .auth-card {
+            background: rgba(4, 13, 18, 0.95);
+            padding: 50px; border-radius: 15px; width: 90%; max-width: 420px;
+            text-align: center; border-top: 4px solid var(--red);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        h2 { color: var(--light); margin-bottom: 25px; font-weight: 700; }
+        .input-box { margin-bottom: 20px; text-align: left; }
+        .input-box label { color: var(--light); font-size: 0.8rem; display: block; margin-bottom: 8px; }
+        .input-box input {
+            width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #333;
+            background: #111; color: white; outline: none; box-sizing: border-box;
+        }
+        .input-box input:focus { border-color: var(--red); }
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--red); border: none;
+            color: white; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background: #a32f41; }
+        .guest-link { display: block; margin-top: 20px; color: #aaa; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
+        .guest-link:hover { color: var(--light); text-decoration: underline; }
+        .switch-form { margin-top: 25px; color: #888; font-size: 0.85rem; }
+        .switch-form span { color: var(--red); cursor: pointer; font-weight: bold; }
+        
+        .divider {
+            display: flex; align-items: center; text-align: center; margin: 20px 0; color: #888; font-size: 0.9rem;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; border-bottom: 1px solid #333;
+        }
+        .divider:not(:empty)::before { margin-right: 10px; }
+        .divider:not(:empty)::after { margin-left: 10px; }
+        .google-btn-container { display: flex; justify-content: center; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2 id="formTitle">Entrar</h2>
+        <form id="authForm">
+            <div class="input-box" id="nameField" style="display: none;">
+                <label>Nome Completo</label>
+                <input type="text" id="userName" placeholder="Seu nome">
+            </div>
+            <div class="input-box">
+                <label>E-mail</label>
+                <input type="email" id="userEmail" placeholder="email@exemplo.com" required>
+            </div>
+            <div class="input-box">
+                <label>Senha</label>
+                <input type="password" id="userPass" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit" id="btnText">Entrar</button>
+        </form>
+        
+        <div class="divider">ou</div>
+
+        <div id="g_id_onload"
+             data-client_id="892335542975-ups3qufrrvkiduj91vrccetle6orl9ib.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+
+        <div class="google-btn-container">
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+        </div>
+        
+        <a onclick="entrarComoConvidado()" class="guest-link">Entrar como Convidado</a>
+        
+        <p class="switch-form" id="switchText">Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAj1UDDybDruWKDFsRD3cIUpy9iO2SmQIg",
+            authDomain: "gamerado-login.firebaseapp.com",
+            projectId: "gamerado-login",
+            storageBucket: "gamerado-login.firebasestorage.app",
+            messagingSenderId: "1039220154035",
+            appId: "1:1039220154035:web:6400d19cf8906418645ac6",
+            measurementId: "G-BY0ERERZPR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função global que será chamada quando o usuário logar com o Google
+        window.salvarNoBanco = async function(dados) {
+            try {
+                // 1. Salva no banco de dados do Firebase (Firestore)
+                await setDoc(doc(db, "usuarios", dados.sub), {
+                    nome: dados.name,
+                    email: dados.email,
+                    foto: dados.picture,
+                    pontos: 0,
+                    nivel: "Membro"
+                }, { merge: true });
+                
+                console.log("Salvo no Firebase com sucesso!");
+
+                // 2. Salva no LocalStorage para o resto do seu site funcionar perfeitamente
+                localStorage.setItem('gameradoflix_isGuest', 'false');
+                localStorage.setItem('gameradoflix_currentUserEmail', dados.email);
+                localStorage.setItem('gameradoflix_currentUserName', dados.name);
+                localStorage.setItem('isLoggedIn', 'true');
+
+                // 3. Só muda de tela DEPOIS que tudo foi salvo no banco e no PC
+                window.location.href = 'selecaoconta.html';
+                
+            } catch (e) {
+                console.error("Erro ao salvar no banco: ", e);
+                alert("Erro ao conectar no banco de dados. Tente novamente.");
+            }
+        }
+    </script>
+
+    <script>
+        let isLogin = true;
+
+        function toggleForm() {
+            const title = document.getElementById('formTitle');
+            const btn = document.getElementById('btnText');
+            const nameField = document.getElementById('nameField');
+            const switchText = document.getElementById('switchText');
+            const nameInput = document.getElementById('userName');
+
+            isLogin = !isLogin;
+
+            if (!isLogin) {
+                title.innerText = 'Cadastrar';
+                btn.innerText = 'Criar Conta';
+                nameField.style.display = 'block';
+                nameInput.required = true;
+                switchText.innerHTML = 'Já tem uma conta? <span onclick="toggleForm()">Faça login.</span>';
+            } else {
+                title.innerText = 'Entrar';
+                btn.innerText = 'Entrar';
+                nameField.style.display = 'none';
+                nameInput.required = false;
+                switchText.innerHTML = 'Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span>';
+            }
+        }
+
+        // Formulário Manual (Email e Senha)
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            const email = document.getElementById('userEmail').value;
+            localStorage.setItem('gameradoflix_isGuest', 'false');
+
+            if(!isLogin) {
+                const nome = document.getElementById('userName').value;
+                localStorage.setItem('gameradoflix_currentUserEmail', email);
+                localStorage.setItem('gameradoflix_currentUserName', nome);
+                alert('Conta criada no LocalStorage. Redirecionando...');
+            } else {
+                localStorage.setItem('gameradoflix_currentUserEmail', email);
+            }
+
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'selecaoconta.html';
+        });
+
+        function entrarComoConvidado() {
+            localStorage.setItem('gameradoflix_isGuest', 'true');
+            window.location.href = 'conta.html';
+        }
+
+        // --- FUNÇÕES DO GOOGLE LOGIN ---
+        function handleCredentialResponse(response) {
+            // 1. O Google logou! Vamos decodificar os dados...
+            const data = parseJwt(response.credential);
+            
+            // 2. Manda os dados para a função do Firebase (que está no outro script)
+            window.salvarNoBanco(data);
+        }
+
+        // Decodificador do Token do Google
+        function parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        }
+    </script>
+</body>
+</html>
